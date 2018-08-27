@@ -4,8 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "webpack-dev-server --watch",
-    "start": "http-server"
+    "start": "webpack"
   },
   "author": "",
   "license": "ISC",

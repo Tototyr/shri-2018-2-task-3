@@ -1,22 +1,32 @@
 // Data
-import Devices from '../data/devices';
-import Rates from '../data/rates';
-import MaxPower from '../data/max-power';
+import Data from '../data/input';
 
 // Models
 import Period from './models/period.model';
 
 class Main {
-  constructor() {
-    this.devices = Devices.devices;
-    this.rates = Rates.rates;
-    this.maxPower = MaxPower.maxPower;
+  constructor(data) {
+    this.devices = data.devices;
+    this.rates = data.rates;
+    this.maxPower = data.maxPower;
 
     this.dailySchedule = [];
     this.maxDayHour = 23;
 
     this.createFullDay();
     this.fillSchedule();
+    
+    console.log(this.generalInformation);
+  }
+	
+	/**
+   *  Получить полную информацию по приборам и периодам.
+	 */
+	get generalInformation() {
+    return {
+	    schedule: this.schedule,
+	    consumedEnergy: this.consumedEnergy
+    };
   }
 
   /**
@@ -25,18 +35,47 @@ class Main {
    * @returns {Array}
    */
   get schedule() {
-    let scheduleList = [];
-    this.dailySchedule.map((period, i) => {
-      const deviceId = period.devices.map((device) => device.id);
-      scheduleList[i] = [...deviceId];
+	  let scheduleList = [];
+	  this.dailySchedule.map((period, i) => {
+		  const deviceId = period.devices.map((device) => device.id);
+		  scheduleList[i] = [...deviceId];
+	  });
+	  
+	  return scheduleList;
+  }
+	
+	/**
+   * Получить значения затраченной электроэнергии.
+   *
+	 * @returns {{value: number, devices: {}}}
+	 */
+	get consumedEnergy() {
+    let consumedEnergy = {
+      value: 0,
+      devices: {}
+    };
+    
+    this.devices.map((device) => {
+	    consumedEnergy.value += this.truncateNumber(device.consumedEnergy);
+	    consumedEnergy.devices[device.id] = this.truncateNumber(device.consumedEnergy);
     });
-
-    console.log(scheduleList);
-    return scheduleList;
+    
+    return consumedEnergy;
+  }
+	
+	/**
+   * Обрезать число до заданного знака после запятой.
+   *
+	 * @param num
+	 * @param digits
+	 * @returns {number}
+	 */
+  truncateNumber(num, digits = 3) {
+    return +(num).toFixed(digits);
   }
 
   /**
-   * Создать массив с ячейками расписания
+   * Создать массив с ячейками расписания.
    */
   createFullDay() {
     this.rates.map((rate) => {
@@ -96,6 +135,7 @@ class Main {
    */
   fillSchedule() {
     this.devices.map((device) => {
+      device.consumedEnergy = 0;
       const periods = this.getRelevantPeriod(device);
       const deviceStages = this.createPairs(periods, device);
 
@@ -173,12 +213,13 @@ class Main {
    * @param device
    */
   addDevice(period, device) {
+    
     period.map((period) => {
+	    device.consumedEnergy += device.power / 1000 * period.value;
       period.totalPower += device.power;
       period.devices.push(device);
     });
   }
-
 }
 
-new Main();
+new Main(Data);
