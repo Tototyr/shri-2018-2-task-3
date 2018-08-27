@@ -1,5 +1,5 @@
 1. `npm install`
-2. Для транскомпиляции `npm run start`.
+2. Для сборки `npm run start`.
 
 Исходные файлы лежат в `./dist/`.
 
