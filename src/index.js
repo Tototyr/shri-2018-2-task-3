@@ -80,8 +80,7 @@ class Main {
   createFullDay() {
     this.rates.map((rate) => {
       const isNight = (rate.from > rate.to);
-      const maxHours = 23;
-      const totalNightHours = maxHours - (rate.from - rate.to);
+      const totalNightHours = this.maxDayHour - (rate.from - rate.to);
 
       const inputData = {
         tick: (isNight) ? 0 : rate.from,
@@ -198,8 +197,12 @@ class Main {
 
     if (totalPeriodPower < this.maxPower) {
       for (let j = 0; j < device.duration; j++) {
-        period.total += stages[i + j].value;
-        period.data.push(stages[i + j]);
+        try {
+          period.total += stages[i + j].value;
+          period.data.push(stages[i + j]);
+        } catch (err)  {
+          throw new Error;
+        }
       }
     }
 
@@ -213,7 +216,6 @@ class Main {
    * @param device
    */
   addDevice(period, device) {
-    
     period.map((period) => {
 	    device.consumedEnergy += device.power / 1000 * period.value;
       period.totalPower += device.power;
